@@ -1,20 +1,3 @@
-# Tilelive provider for public transport stops
+# tilelive-otp-stops
 
-## Requirements
-
-- Tessera
- -  Mapnik is a requirement for tessera
- -  - Mapnik currently requires Node < 6
-- OpenTripPlanner server (v. 0.20.0 or above)
-
-## Stand-alone installation
-
-    git clone https://github.com/HSLdevcom/tilelive-otp-stops
-    brew install mapnik (for OS X)
-    apt-get install mapnik (for Debian based Linux distros)
-    npm install tessera
-    
-## Running stand-alone
-
-    node_modules/.bin/tessera <Tessera options> otpstops://<path to otp-router>/index/graphql -r `pwd`
-
+This is a tilelive vector tile source for stops used by [hsl-map-server](https://github.com/HSLdevcom/hsl-map-server).
