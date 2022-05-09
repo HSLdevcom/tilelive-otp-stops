@@ -93,9 +93,9 @@ const stopMapper = data => ({
       gtfsId: stop.gtfsId,
       name: stop.name,
       code: stop.code,
-      platform: stop.platformCode,
+      platform: stop.platformCode == null ? 'null' : stop.platformCode, // TODO: 'null' -string should be changed to null after the map style of HSL app has been updated.
       desc: stop.desc,
-      parentStation: stop.parentStation == null ? null : stop.parentStation.gtfsId,
+      parentStation: stop.parentStation == null ? 'null' : stop.parentStation.gtfsId, // TODO: 'null' -string should be changed to null after the map style of HSL app has been updated.
       type: stop.patterns == null ? null : stop.patterns.map(pattern => pattern.route.mode).uniq().join(","),
       patterns: stop.patterns == null ? null : JSON.stringify(stop.patterns.map(pattern => ({
         headsign: pattern.headsign,
