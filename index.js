@@ -57,6 +57,7 @@ const stopQuery = `
         route {
           mode
           shortName
+          gtfsType: type
         }
       }
     }
@@ -77,6 +78,7 @@ const stationQuery = `
           route {
             mode
             shortName
+            gtfsType: type
           }
         }
       }
@@ -101,6 +103,7 @@ const stopMapper = data => ({
         headsign: pattern.headsign,
         type: pattern.route.mode,
         shortName: pattern.route.shortName,
+        gtfsType: pattern.route.gtfsType,
       })))
     }
   }))
