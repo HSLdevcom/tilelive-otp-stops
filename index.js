@@ -39,7 +39,7 @@ const getTileIndex = (url, cachedIndex, query, map, callback) => {
         return;
       }
       callback(null, geojsonVt(map(JSON.parse(body)), {
-        maxZoom: 14,
+        maxZoom: 20,
         buffer: 64,
       })); //TODO: this should be configurable)
     })
@@ -189,7 +189,7 @@ class GeoJSONSource {
     callback(null, {
       name: "Stops",
       format: "pbf",
-      maxzoom: 14,
+      maxzoom: 20,
       minzoom: 0,
       vector_layers: [{
         description: "",
