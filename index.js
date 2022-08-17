@@ -5,6 +5,10 @@ const request = require('requestretry');
 const zlib = require('zlib');
 const _ = require('lodash')
 
+// cache indices
+const stationIndex = {};
+const stopIndex = {};
+
 Array.prototype.flatMap = function(lambda) {
   return [].concat.apply([],this.map(lambda));
 };
@@ -13,29 +17,33 @@ Array.prototype.uniq = function() {
   return _.uniqWith(this, _.isEqual)
 }
 
-const getTileIndex = (url, query, map, callback) => {
-  request({
-    url: url,
-    body: query,
-    maxAttempts: 120,
-    retryDelay: 30000,
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/graphql',
-      'OTPTimeout': '120000',
-      'OTPMaxResolves': '100000000'
-    }
-  }, function (err, res, body){
-    if (err){
-      console.log(err)
-      callback(err);
-      return;
-    }
-    callback(null, geojsonVt(map(JSON.parse(body)), {
-      maxZoom: 20,
-      buffer: 1024,
-    })); //TODO: this should be configurable)
-  })
+const getTileIndex = (url, cachedIndex, query, map, callback) => {
+  if (cachedIndex) {
+    callback(null, cachedIndex);
+  } else {
+    request({
+      url: url,
+      body: query,
+      maxAttempts: 120,
+      retryDelay: 30000,
+      method: 'POST',
+      headers: {
+	'Content-Type': 'application/graphql',
+	'OTPTimeout': '120000',
+	'OTPMaxResolves': '100000000'
+      }
+    }, function (err, res, body){
+      if (err){
+	console.log(err)
+	callback(err);
+	return;
+      }
+      callback(null, geojsonVt(map(JSON.parse(body)), {
+	maxZoom: 20,
+	buffer: 1024,
+      })); //TODO: this should be configurable)
+    })
+  }
 }
 
 const stopQuery = `
@@ -128,24 +136,30 @@ const stationMapper = data => ({
 class GeoJSONSource {
   constructor(uri, callback){
     uri.protocol = "http:"
-    getTileIndex(uri, stopQuery, stopMapper, (err, stopTileIndex) => {
+    const key = uri.host + uri.path;
+
+    getTileIndex(uri, stopIndex[key], stopQuery, stopMapper, (err, stopTileIndex) => {
       if (err){
         callback(err);
         return;
       }
       this.stopTileIndex = stopTileIndex;
-      getTileIndex(uri, stationQuery, stationMapper, (err, stationTileIndex) => {
+      stopIndex[key] = stopTileIndex;
+      getTileIndex(uri, stationIndex[key], stationQuery, stationMapper, (err, stationTileIndex) => {
         if (err){
           callback(err);
           return;
         }
         this.stationTileIndex = stationTileIndex;
-        console.log("stops loaded from:", uri.host + uri.path)
-        callback(null, this);
+	if (!stationIndex[key]) {
+	  console.log("stops and stations loaded from:", uri.host + uri.path)
+	} else {
+	  stationIndex[key] = stationTileIndex;
+	}
+	callback(null, this);
       })
     })
   };
-
 
   getTile(z, x, y, callback){
     let stopTile = this.stopTileIndex.getTile(z, x, y)
