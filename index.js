@@ -28,19 +28,19 @@ const getTileIndex = (url, cachedIndex, query, map, callback) => {
       retryDelay: 30000,
       method: 'POST',
       headers: {
-	'Content-Type': 'application/graphql',
-	'OTPTimeout': '120000',
-	'OTPMaxResolves': '100000000'
+        'Content-Type': 'application/graphql',
+        'OTPTimeout': '120000',
+        'OTPMaxResolves': '100000000'
       }
     }, function (err, res, body){
       if (err){
-	console.log(err)
-	callback(err);
-	return;
+        console.log(err)
+        callback(err);
+        return;
       }
       callback(null, geojsonVt(map(JSON.parse(body)), {
-	maxZoom: 20,
-	buffer: 1024,
+        maxZoom: 14,
+        buffer: 64,
       })); //TODO: this should be configurable)
     })
   }
@@ -151,12 +151,12 @@ class GeoJSONSource {
           return;
         }
         this.stationTileIndex = stationTileIndex;
-	if (!stationIndex[key]) {
-	  console.log("stops and stations loaded from:", uri.host + uri.path)
-	} else {
-	  stationIndex[key] = stationTileIndex;
-	}
-	callback(null, this);
+        if (!stationIndex[key]) {
+          console.log("stops and stations loaded from:", uri.host + uri.path)
+        } else {
+          stationIndex[key] = stationTileIndex;
+        }
+        callback(null, this);
       })
     })
   };
@@ -187,8 +187,9 @@ class GeoJSONSource {
 
   getInfo(callback){
     callback(null, {
+      name: "Stops",
       format: "pbf",
-      maxzoom: 20,
+      maxzoom: 14,
       minzoom: 0,
       vector_layers: [{
         description: "",
